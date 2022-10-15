@@ -149,3 +149,10 @@ export const updatePassword = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+/* Get Images
+============= */
+// @GET '/downloads/:path'
+export const getFile = (req, res) => {
+  res.download("./uploads/" + req.params.path);
+};

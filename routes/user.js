@@ -42,4 +42,7 @@ router.put(
 // Update Password
 router.put("/password", validateToken, updatePassword);
 
+// Get User Picture.
+router.get("/uploads/:path", getFile);
+
 export default router;
