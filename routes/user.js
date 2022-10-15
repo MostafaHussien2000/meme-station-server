@@ -7,6 +7,7 @@ import {
   uploadProfilePicture,
   uploadCoverPicture,
   updatePassword,
+  getFile,
 } from "../controllers/userController.js";
 
 import validateToken from "../middlewares/authMiddleware.js";
