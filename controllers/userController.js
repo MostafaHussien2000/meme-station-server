@@ -1,6 +1,5 @@
-import bcrypt from "bcrypt";
-
 import UserModel from "../models/User.js";
+import bcrypt from "bcrypt";
 
 /* Get User Data
 ================ */
@@ -155,4 +154,70 @@ export const updatePassword = async (req, res) => {
 // @GET '/downloads/:path'
 export const getFile = (req, res) => {
   res.download("./uploads/" + req.params.path);
+};
+
+/* Follow User
+============== */
+// @PUT '/follow/:username'
+export const followUser = async (req, res) => {
+  const { username } = req.user;
+  const targetUsername = req.params.username;
+
+  if (username === targetUsername)
+    return res.status(403).json({ message: "you can't follow yourself" });
+
+  try {
+    const currentUser = await UserModel.findOne({ username });
+    const targetUser = await UserModel.findOne({ username: targetUsername });
+
+    if (!targetUser)
+      return res.status(404).json({
+        message: "you are trying to follow a user that does not exist",
+      });
+
+    if (targetUser.followers.includes(username))
+      return res.status(403).json({ message: "you already follow this user" });
+
+    await targetUser.updateOne({ $push: { followers: username } });
+    await currentUser.updateOne({ $push: { following: targetUsername } });
+
+    return res.status(200).json({ message: `you followed ${targetUsername}` });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+/* Unfollow User
+================ */
+// @PUT '/unfollow/:username'
+export const unfollowUser = async (req, res) => {
+  const { username } = req.user;
+  const targetUsername = req.params.username;
+
+  if (username === targetUsername)
+    return res.status(403).json({ message: "you can't unfollow yourself" });
+
+  try {
+    const currentUser = await UserModel.findOne({ username });
+    const targetUser = await UserModel.findOne({ username: targetUsername });
+
+    if (!targetUser)
+      return res.status(404).json({
+        message: "you are trying to follow a user that does not exist",
+      });
+
+    if (!targetUser.followers.includes(username))
+      return res
+        .status(403)
+        .json({ message: "you already not following this user" });
+
+    await targetUser.updateOne({ $pull: { followers: username } });
+    await currentUser.updateOne({ $pull: { following: targetUsername } });
+
+    return res
+      .status(200)
+      .json({ message: `you unfollowed ${targetUsername}` });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };

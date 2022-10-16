@@ -6,12 +6,13 @@ const PostSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    image: String,
+    image: { type: String },
     caption: {
       type: String,
       required: true,
     },
-    likes: [],
+    upVotes: [],
+    downVotes: [],
     comments: [],
   },
   {

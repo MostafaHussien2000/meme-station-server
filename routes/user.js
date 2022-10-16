@@ -8,6 +8,8 @@ import {
   uploadCoverPicture,
   updatePassword,
   getFile,
+  followUser,
+  unfollowUser,
 } from "../controllers/userController.js";
 
 import validateToken from "../middlewares/authMiddleware.js";
@@ -45,5 +47,11 @@ router.put("/password", validateToken, updatePassword);
 
 // Get User Picture.
 router.get("/uploads/:path", getFile);
+
+// Follow User
+router.put("/follow/:username", validateToken, followUser);
+
+// Unfollow User
+router.put("/unfollow/:username", validateToken, unfollowUser);
 
 export default router;

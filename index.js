@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 // Importing routes
 import auth from "./routes/auth.js";
 import user from "./routes/user.js";
+import post from "./routes/post.js";
 
 const app = express();
 
@@ -32,3 +33,4 @@ mongoose
 ============= */
 app.use("/auth", auth);
 app.use("/user", user);
+app.use("/post", post);
