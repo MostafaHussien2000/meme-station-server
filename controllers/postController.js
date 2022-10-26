@@ -1,9 +1,11 @@
 // TODO: Implement commenting logic for the api
 
 import PostModel from "../models/Post.js";
+import UserModel from "../models/User.js";
 
 /* Get Post Info
 ================ */
+// @GET '/:id'
 export const getPost = async (req, res) => {
   const { id } = req.params;
 
@@ -19,6 +21,7 @@ export const getPost = async (req, res) => {
 
 /* Create New Post
 ================== */
+// @POST '/'
 export const createNewPost = async (req, res) => {
   const { username } = req.user;
 
@@ -39,6 +42,7 @@ export const createNewPost = async (req, res) => {
 
 /* Edit Post
 ============ */
+// @PUT '/:id'
 export const editPost = async (req, res) => {
   const { id } = req.params;
   const { username } = req.user;
@@ -63,6 +67,7 @@ export const editPost = async (req, res) => {
 
 /* Delete Post
 ============== */
+// @DELETE '/:id'
 export const deletePost = async (req, res) => {
   const { username } = req.user;
   const { id } = req.params;
@@ -87,6 +92,7 @@ export const deletePost = async (req, res) => {
 
 /* UpVote a Post
 ================ */
+// @PUT '/upvote/:id'
 export const upVotePost = async (req, res) => {
   const { id } = req.params;
   const { username } = req.user;
@@ -114,6 +120,7 @@ export const upVotePost = async (req, res) => {
 
 /* DownVote a Post
 ================== */
+// @PUT '/downvote/:id'
 export const downVotePost = async (req, res) => {
   const { id } = req.params;
   const { username } = req.user;
@@ -138,6 +145,8 @@ export const downVotePost = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+// TODO: Implement the commenting endpoint functionalities
 
 /* Add Comment to a Post
 ======================== */
@@ -168,4 +177,57 @@ export const addComment = async (req, res) => {
 ================= */
 export const deleteComment = async (req, res) => {
   return res.json.params();
+};
+
+/* Get Timeline Posts
+===================== */
+// @GET "/timeline"
+export const getTimelinePosts = async (req, res) => {
+  const { username } = req.user;
+  const { index } = req.query;
+
+  const LIMIT = 3;
+
+  try {
+    // we will return all the posts from the people he followed
+    const user = await UserModel.findOne({ username });
+    const { following } = user;
+
+    const timelinePosts = await PostModel.find({
+      username: { $in: following },
+    })
+      .sort({ createdAt: -1 })
+      .skip(index * LIMIT)
+      .limit(LIMIT);
+
+    return res.status(200).json(timelinePosts);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+/* Get All Posts for One User
+============================= */
+// @GET "/:username"
+export const getUserPosts = async (req, res) => {
+  const { username } = req.params;
+
+  const { index } = req.query;
+
+  const LIMIT = 3;
+
+  try {
+    const user = await UserModel.findOne({ username });
+
+    if (!user) return res.status(404).json({ message: "User not found!" });
+
+    const posts = await PostModel.find({ username })
+      .sort({ createdAt: -1 })
+      .skip(index * LIMIT)
+      .limit(LIMIT);
+
+    return res.status(200).json(posts);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 };
