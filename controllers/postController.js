@@ -104,14 +104,18 @@ export const upVotePost = async (req, res) => {
     if (!post.upVotes.includes(username)) {
       await post.updateOne({ $push: { upVotes: username } });
       await post.updateOne({ $pull: { downVotes: username } });
-      return res
-        .status(200)
-        .json({ message: "you added your upvote on this post." });
+      return res.status(200).json({
+        message: "you added your upvote on this post.",
+        vote: 1,
+        count: post.upVotes.length,
+      });
     } else {
       await post.updateOne({ $pull: { upVotes: username } });
-      return res
-        .status(200)
-        .json({ message: "you removed your upvote on this post." });
+      return res.status(200).json({
+        message: "you removed your upvote on this post.",
+        vote: 0,
+        count: post.upVotes.length,
+      });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -132,14 +136,18 @@ export const downVotePost = async (req, res) => {
     if (!post.downVotes.includes(username)) {
       await post.updateOne({ $push: { downVotes: username } });
       await post.updateOne({ $pull: { upVotes: username } });
-      return res
-        .status(200)
-        .json({ message: "you added your downvote on this post." });
+      return res.status(200).json({
+        message: "you added your downvote on this post.",
+        vote: 1,
+        count: post.downVotes.length + 1,
+      });
     } else {
       await post.updateOne({ $pull: { downVotes: username } });
-      return res
-        .status(200)
-        .json({ message: "you removed your downvote on this post." });
+      return res.status(200).json({
+        message: "you removed your downvote on this post.",
+        vote: 0,
+        count: post.downVotes.length - 1,
+      });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });

@@ -1,4 +1,5 @@
 import UserModel from "../models/User.js";
+import PostModel from "../models/Post.js";
 import bcrypt from "bcrypt";
 
 /* Get User Data
@@ -11,12 +12,44 @@ export const getUser = async (req, res) => {
     const user = await UserModel.findOne({ username });
 
     if (!user) {
-      return res.status(404).json({ message: "user does not exist" });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
     const { password, ...otherData } = user._doc;
 
-    return res.status(200).json(otherData);
+    /* 
+    To detect if the logged user is one of these: 
+      1.same target user            =>  state = -1
+      2. following target user      =>  state = 1
+      3. not following target user  =>  state = 0
+    */
+    let state;
+
+    if (req.user.username === username) {
+      state = -1;
+    } else if (otherData.followers.includes(req.user.username)) {
+      state = 1;
+    } else {
+      state = 0;
+    }
+
+    delete otherData.followers;
+    delete otherData.following;
+    delete otherData.createdAt;
+    delete otherData.updatedAt;
+    delete otherData.__v;
+
+    const postsCount = await PostModel.countDocuments({
+      username: user.username,
+    });
+
+    return res.status(200).json({
+      ...otherData,
+      followersCount: user.followers.length,
+      followingCount: user.following.length,
+      postsCount: postsCount,
+      state,
+    });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

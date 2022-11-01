@@ -18,7 +18,7 @@ import upload from "../middlewares/imageUploaderMiddleware.js";
 const router = express.Router();
 
 // Get User Data
-router.get("/:username", getUser);
+router.get("/:username", validateToken,  getUser);
 
 // Update User Data
 router.put("/", validateToken, updateUserInfo);
